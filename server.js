@@ -28,7 +28,21 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname,"public")));
 
 // Connect to the Mongo DB
-mongoose.connect("mongodb://localhost/mongoScraper");
+var databaseUri = "mongodb://localhost/mongoScraper";
+if(process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI);
+} else {
+  mongoose.connect(databaseUri);
+}
+var db = mongoose.connection;
+
+db.on("error",function(err){
+  console.log("mongoose error: ", err);
+})
+
+db.once("open",function(){
+  console.log("Mongoose connection successful");
+})
 
 // Routes
 app.get("/", function(req, res) {
